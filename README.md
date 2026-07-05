@@ -13,7 +13,7 @@ pinned: false
 
 Weighted Ensemble CNN using 6 pretrained models achieving 97.54% accuracy.
 
-Published: IEEE DASA 2024 - Shreya Singh et al.
+Published: IEEE DASA 2024 - Shreya Singh.
 
 ## Model Weights
 
