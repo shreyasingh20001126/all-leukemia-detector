@@ -195,7 +195,7 @@ def load_models_and_weights():
     missing = []
 
     for name in MODEL_BUILDERS:
-        weight_path = os.path.join(weights_dir, f"{name}.h5")
+        weight_path = os.path.join(weights_dir, f"{name}.weights.h5")
         if os.path.exists(weight_path):
             weight_paths[name] = weight_path
         else:
