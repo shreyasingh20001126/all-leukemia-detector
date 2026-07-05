@@ -104,7 +104,7 @@ with st.sidebar:
         "F1 Score": ["96.22%", "94.78%", "94.55%", "94.51%", "91.08%", "87.17%", "**97.01%**"],
     }
     import pandas as pd
-    st.dataframe(pd.DataFrame(perf_data), hide_index=True, use_container_width=True)
+    st.dataframe(pd.DataFrame(perf_data), hide_index=True)
 
     st.divider()
     st.markdown("### Dataset")
@@ -274,13 +274,13 @@ if uploaded_file is not None:
 
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.image(orig, caption="1. Original", use_container_width=True)
+        st.image(orig, caption="1. Original")
     with col2:
-        st.image(cropped, caption="2. Center crop (black removed)", use_container_width=True)
+        st.image(cropped, caption="2. Center crop (black removed)")
     with col3:
-        st.image(enhanced, caption="3. CLAHE applied", use_container_width=True)
+        st.image(enhanced, caption="3. CLAHE applied")
     with col4:
-        st.image(final, caption="4. Resized 224×224", use_container_width=True)
+        st.image(final, caption="4. Resized 224×224")
 
     # Prepare input tensor
     preprocessed = preprocess_image(pil_image)
@@ -362,7 +362,7 @@ if uploaded_file is not None:
                 "Ensemble Weight": f"{w:.4f}",
                 "Weighted Contribution": f"{individual_probs[name] * w:.4f}",
             })
-        st.dataframe(pd.DataFrame(weight_data), hide_index=True, use_container_width=True)
+        st.dataframe(pd.DataFrame(weight_data), hide_index=True)
         st.caption(f"Final ensemble probability (sum of weighted contributions): **{prob_all:.4f}**")
 
     # Disclaimer
