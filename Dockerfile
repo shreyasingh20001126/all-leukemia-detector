@@ -8,7 +8,7 @@ RUN python3 -c "from huggingface_hub import hf_hub_download; \
 import shutil, os; \
 os.makedirs('/app/weights', exist_ok=True); \
 files = ['AlexNet.weights.h5','VGG16.weights.h5','ResNet50.weights.h5','ResNet152.weights.h5','MobileNet.weights.h5','EfficientNetV2.weights.h5']; \
-[shutil.copy(hf_hub_download(repo_id='shreyasingh2000/all-leukemia-weights', filename=f), f'/app/weights/{f.replace(\".weights\",\"\")}') for f in files]"
+[shutil.copy(hf_hub_download(repo_id='shreyasingh2000/all-leukemia-weights', filename=f), f'/app/weights/{f}') for f in files]"
 
 COPY . .
 EXPOSE 8501
