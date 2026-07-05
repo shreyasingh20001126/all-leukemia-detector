@@ -7,6 +7,7 @@ Run locally:  streamlit run app.py
 
 import os
 import json
+import gc
 import numpy as np
 import streamlit as st
 from PIL import Image
@@ -173,37 +174,48 @@ DEFAULT_WEIGHTS = {
 @st.cache_resource
 def load_models_and_weights():
     """
-    Loads model architectures and trained weights.
-    Weights must be in ./weights/ folder as {ModelName}.h5
+    Checks which trained weight files are available.
+    Models are NOT built or loaded here -- only one model is built,
+    used, and discarded at a time during prediction, to keep peak
+    memory low on free-tier hardware.
     """
     weights_dir = os.path.join(os.path.dirname(__file__), "weights")
-    
-    # Load ensemble weights config
+
     weights_config_path = os.path.join(weights_dir, "ensemble_weights.json")
     if os.path.exists(weights_config_path):
         with open(weights_config_path) as f:
             raw_weights = json.load(f)
     else:
         raw_weights = DEFAULT_WEIGHTS
-    
-    # Normalise weights
+
     total = sum(raw_weights.values())
     ensemble_weights = {k: v / total for k, v in raw_weights.items()}
 
-    models = {}
+    weight_paths = {}
     missing = []
-    
-    for name, builder in MODEL_BUILDERS.items():
+
+    for name in MODEL_BUILDERS:
         weight_path = os.path.join(weights_dir, f"{name}.h5")
-        model = builder()
-        
         if os.path.exists(weight_path):
-            model.load_weights(weight_path)
-            models[name] = model
+            weight_paths[name] = weight_path
         else:
             missing.append(name)
-    
-    return models, ensemble_weights, missing
+
+    return weight_paths, ensemble_weights, missing
+
+
+def predict_one_model(name, weight_path, input_tensor):
+    """
+    Builds a single model, loads its weights, predicts once, then
+    frees it from memory. Keeps peak memory to ~1 model at a time.
+    """
+    model = MODEL_BUILDERS[name]()
+    model.load_weights(weight_path)
+    prob = float(model.predict(input_tensor, verbose=0)[0][0])
+    del model
+    tf.keras.backend.clear_session()
+    gc.collect()
+    return prob
 
 
 # ---------------------------------------------------------------
@@ -281,8 +293,8 @@ if uploaded_file is not None:
         individual_probs = {}
         weighted_sum = 0.0
 
-        for name, model in models.items():
-            prob = float(model.predict(input_tensor, verbose=0)[0][0])
+        for name, weight_path in models.items():
+            prob = predict_one_model(name, weight_path, input_tensor)
             individual_probs[name] = prob
             if name in ensemble_weights:
                 weighted_sum += prob * ensemble_weights[name]
